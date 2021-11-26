@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button id="rm1">room 1</button>
+    <button id="rm2">room 2</button>
+
+    <input type="text" id="msgbody">
+    <button id="sendmsg">Send</button>
+
+    <div id="txt"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+        let txt = document.getElementById("txt")
+        let msgBody = document.getElementById("msgbody")
+        let sendMsg = document.getElementById("sendmsg")
+
+        document.querySelector('#rm1').addEventListener("click", () => {
+            socket.emit("rm1", "rm1")
+            txt.innerHTML = ""
+        })
+        document.querySelector('#rm2').addEventListener("click", () => {
+            socket.emit("rm2", "rm2")
+            txt.innerHTML = ""
+        })
+
+        sendMsg.addEventListener("click", () => {
+            socket.emit("msg", msgBody.value)
+        })
+
+        socket.on('msg', (msg) => {
+            el = document.createElement('p')
+            el.innerText = msg
+            txt.appendChild(el)
+        })
+    </script>
+</body>
+
+</html>
