@@ -25,11 +25,11 @@
 
         document.querySelector('#rm1').addEventListener("click", () => {
             socket.emit("rm1", "rm1")
-            txt.innerHTML = ""
+            txt.innerHTML = "rm1"
         })
         document.querySelector('#rm2').addEventListener("click", () => {
             socket.emit("rm2", "rm2")
-            txt.innerHTML = ""
+            txt.innerHTML = "rm2"
         })
 
         sendMsg.addEventListener("click", () => {
