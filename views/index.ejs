@@ -9,8 +9,13 @@
 </head>
 
 <body>
-    <button id="rm1">room 1</button>
-    <button id="rm2">room 2</button>
+    <span>
+        <% for(i of rooms) {%>
+            <button id="<%=i._id %>">
+                <%=i.name %>
+            </button>
+            <% } %>
+    </span>
 
     <input type="text" id="msgbody">
     <button id="sendmsg">Send</button>
@@ -22,19 +27,17 @@
         let txt = document.getElementById("txt")
         let msgBody = document.getElementById("msgbody")
         let sendMsg = document.getElementById("sendmsg")
+            <% for (i of rooms) {%>
 
-        document.querySelector('#rm1').addEventListener("click", () => {
-            socket.emit("rm1", "rm1")
-            txt.innerHTML = "rm1"
-        })
-        document.querySelector('#rm2').addEventListener("click", () => {
-            socket.emit("rm2", "rm2")
-            txt.innerHTML = "rm2"
-        })
+                document.getElementById('<%=i._id %>').addEventListener("click", () => {
+                    socket.emit("<%=i._id %>", "<%=i._id %>")
+                    txt.innerHTML = "<%=i._id.name %>"
+                })
+                <% } %>
 
-        sendMsg.addEventListener("click", () => {
-            socket.emit("msg", msgBody.value)
-        })
+                    sendMsg.addEventListener("click", () => {
+                        socket.emit("msg", msgBody.value)
+                    })
 
         socket.on('msg', (msg) => {
             el = document.createElement('p')

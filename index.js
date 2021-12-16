@@ -5,7 +5,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const mongoose = require('mongoose');
 const session = require("express-session")
-const User = require('./schemas.js')
+const { User, Room } = require('./schemas.js')
 const passport = require('passport')
 const LocalStrategy = require('passport-local');
 
@@ -51,16 +51,27 @@ isLoggedIn = (req, res, next) => {
     next();
 }
 
-app.get("/", isLoggedIn, (req, res) => {
-    res.render('index')
+app.get("/", isLoggedIn, async (req, res) => {
+    const user = await User.findById(req.user._id).populate("rooms");
+    res.render('index', { rooms: user.rooms })
 })
 
-app.get('/joinRoom/:room', async (req, res) => {
+app.get('/joinRoom/:id', isLoggedIn, async (req, res) => {
+    const room = await Room.findById(req.params.id)
     const user = await User.findById(req.user._id);
-    user.rooms.push(req.params.room)
-    console.log(user);
+    user.rooms.push(room._id)
+    await user.save();
     res.redirect("/")
 });
+
+app.get("/createroom/:name", isLoggedIn, async (req, res) => {
+    const room = new Room({ name: req.params.name })
+    await room.save();
+    const user = await User.findById(req.user._id);
+    user.rooms.push(room._id)
+    await user.save();
+    res.send(room._id)
+})
 
 app.get("/login", (req, res) => {
     res.render('login')
@@ -71,7 +82,6 @@ app.get('/register', (req, res) => {
 })
 
 app.post('/register', async (req, res) => {
-    console.log(req.body);
     const { username, password } = req.body;
     const user = new User({ username: req.body.username })
     const registeredUser = await User.register(user, password);
@@ -94,7 +104,6 @@ io.on('connection', (socket) => {
     console.log('a user connected');
 
     socket.on('msg', (msg) => {
-        console.log(msg)
         io.to([...socket.rooms][1]).emit("msg", msg)
     })
 
