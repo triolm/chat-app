@@ -53,7 +53,7 @@ isLoggedIn = (req, res, next) => {
 
 app.get("/", isLoggedIn, async (req, res) => {
     const user = await User.findById(req.user._id).populate("rooms");
-    res.render('index', { rooms: user.rooms })
+    res.render('index', { rooms: user.rooms, username: req.user.username })
 })
 
 app.get('/joinRoom/:id', isLoggedIn, async (req, res) => {

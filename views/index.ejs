@@ -5,46 +5,133 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <title>Document</title>
 </head>
 
 <body>
-    <span>
-        <% for(i of rooms) {%>
-            <button id="<%=i._id %>">
-                <%=i.name %>
-            </button>
-            <% } %>
-    </span>
+    <div class="row w-100 m-0">
+        <span class="col-3">
+            <h3 class="p-2">Rooms</h3>
+            <div class="d-block btn-group" role="group">
+                <% for(i of rooms) {%>
+                    <button class="btn btn-primary mx-1" id="<%=i._id %>">
+                        <%=i.name %>
+                    </button>
+                    <% } %>
+            </div>
+        </span>
+        <span id="right" class="col-9 d-none d-flex flex-column">
 
-    <input type="text" id="msgbody">
-    <button id="sendmsg">Send</button>
+            <h3 id="room-title" class="p-2"></h3>
+            <div id="txt" class="px-2"></div>
+            <form id="msgInput">
+                <input class="form-control w-auto d-inline" type="text" id="msgbody">
+                <button class="btn btn-primary d-inline" id="sendmsg">Send</button>
+            </form>
 
-    <div id="txt"></div>
+        </span>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         let socket = io();
         let txt = document.getElementById("txt")
         let msgBody = document.getElementById("msgbody")
         let sendMsg = document.getElementById("sendmsg")
+        let roomTitle = document.getElementById("room-title")
+        let username = '<%- JSON.stringify(username) %>'
             <% for (i of rooms) {%>
 
-                document.getElementById('<%=i._id %>').addEventListener("click", () => {
-                    socket.emit("<%=i._id %>", "<%=i._id %>")
-                    txt.innerHTML = "<%=i._id.name %>"
+                document.getElementById('<%=i._id %>').addEventListener("click", (e) => {
+                    document.getElementById("right").classList.remove('d-none');
+                    socket.emit("<%=i._id %>", "<%=i._id %>");
+                    txt.innerHTML = "";
+                    roomTitle.innerText = e.target.innerText;
                 })
                 <% } %>
 
-                    sendMsg.addEventListener("click", () => {
-                        socket.emit("msg", msgBody.value)
+                    sendMsg.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        if (!msgBody.value) return;
+                        socket.emit("msg", { text: msgBody.value, username: username })
+                        msgBody.value = ""
                     })
 
         socket.on('msg', (msg) => {
             el = document.createElement('p')
-            el.innerText = msg
-            txt.appendChild(el)
+            el.innerText = msg.text
+            let div = document.createElement('div');
+            if (msg.username == username) {
+                div.classList.add("fromSelf")
+            }
+            else {
+                div.classList.add("fromOther",)
+            }
+            div.classList.add("msgHolder")
+            div.appendChild(el)
+            txt.appendChild(div)
+            txt.scrollTop = txt.scrollHeight
+
         })
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
 </body>
+
+<style>
+    body {
+        /* overflow: hidden; */
+    }
+
+    .fromSelf p {
+        background-color: lightgray;
+    }
+
+    .fromOther p {
+        background-color: lightblue;
+
+    }
+
+    .msgHolder {
+        display: flex;
+    }
+
+    .fromSelf {
+        justify-content: right;
+
+    }
+
+    .msgHolder p {
+        display: block;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    #txt {
+        bottom: 0;
+        flex-grow: 100;
+        overflow-y: scroll;
+    }
+
+    #room-title {
+        padding: 1rem .5rem 1rem .5rem;
+        box-shadow: 0px 0 5px -2px #888;
+
+    }
+
+    #right {
+        padding: 0;
+        background-color: #efefef;
+        max-height: 100vh;
+        height: 100vh;
+    }
+
+    #msgInput {
+        padding: 1rem .5rem 1rem .5rem;
+        background-color: #dedede;
+    }
+</style>
 
 </html>
