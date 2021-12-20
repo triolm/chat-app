@@ -22,7 +22,6 @@ mongoose.connect('mongodb://localhost:27017/chat', { useNewUrlParser: true, useU
 
 const path = require("path")
 const ejs = require("ejs");
-const { findById } = require('./schemas.js');
 
 app.use(session({
     secret: 'secret',
@@ -56,21 +55,26 @@ app.get("/", isLoggedIn, async (req, res) => {
     res.render('index', { rooms: user.rooms, username: req.user.username })
 })
 
-app.get('/joinRoom/:id', isLoggedIn, async (req, res) => {
-    const room = await Room.findById(req.params.id)
+app.get('/joinRoom/', isLoggedIn, async (req, res) => {
+    console.log(req.query.id)
+    const room = await Room.findById(req.query.id)
     const user = await User.findById(req.user._id);
     user.rooms.push(room._id)
     await user.save();
     res.redirect("/")
 });
 
-app.get("/createroom/:name", isLoggedIn, async (req, res) => {
-    const room = new Room({ name: req.params.name })
+app.get('/createroom', isLoggedIn, async (req, res) => {
+    res.render('newroom')
+})
+
+app.post("/createroom/", isLoggedIn, async (req, res) => {
+    const room = new Room({ name: req.body.roomname })
     await room.save();
     const user = await User.findById(req.user._id);
     user.rooms.push(room._id)
     await user.save();
-    res.send(room._id)
+    res.redirect('/')
 })
 
 app.get("/login", (req, res) => {

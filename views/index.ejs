@@ -14,20 +14,33 @@
     <div class="row w-100 m-0">
         <span class="col-3">
             <h3 class="p-2">Rooms</h3>
-            <div class="d-block btn-group" role="group">
+            <div id="room-holder" class="d-block" role="group">
                 <% for(i of rooms) {%>
-                    <button class="btn btn-primary mx-1" id="<%=i._id %>">
+                    <button class="w-100 btn btn-secondary mx-1 my-2" id="<%=i._id %>">
                         <%=i.name %>
                     </button>
                     <% } %>
             </div>
+            <hr>
+            <div class="mt-5">
+                <form action="/createroom" method="get">
+                    <button class="btn btn-primary w-100">New Room</button>
+                </form>
+                <form class="card p-2 my-2" action="/joinroom" method="get">
+                    <input type="text" name="id" class="form-control my-2">
+                    <button class="btn btn-primary">Join Room</button>
+                </form>
+            </div>
         </span>
         <span id="right" class="col-9 d-none d-flex flex-column">
 
-            <h3 id="room-title" class="p-2"></h3>
+            <div id="room-header" class="p-2 ps-3">
+                <h3 id="room-title"></h3>
+                <p id="room-id"></p>
+            </div>
             <div id="txt" class="px-2"></div>
-            <form id="msgInput">
-                <input class="form-control w-auto d-inline" type="text" id="msgbody">
+            <form id="msgInput" class="d-flex">
+                <input class="form-control d-inline mx-2" type="text" id="msgbody">
                 <button class="btn btn-primary d-inline" id="sendmsg">Send</button>
             </form>
 
@@ -40,6 +53,7 @@
         let msgBody = document.getElementById("msgbody")
         let sendMsg = document.getElementById("sendmsg")
         let roomTitle = document.getElementById("room-title")
+        let joinCode = document.getElementById("room-id")
         let username = '<%- JSON.stringify(username) %>'
             <% for (i of rooms) {%>
 
@@ -48,6 +62,7 @@
                     socket.emit("<%=i._id %>", "<%=i._id %>");
                     txt.innerHTML = "";
                     roomTitle.innerText = e.target.innerText;
+                    joinCode.innerText = "Join code: " + e.target.id
                 })
                 <% } %>
 
@@ -115,7 +130,7 @@
         overflow-y: scroll;
     }
 
-    #room-title {
+    #room-header {
         padding: 1rem .5rem 1rem .5rem;
         box-shadow: 0px 0 5px -2px #888;
 
@@ -131,6 +146,17 @@
     #msgInput {
         padding: 1rem .5rem 1rem .5rem;
         background-color: #dedede;
+    }
+
+    #room-id {
+        font-weight: 600;
+        color: darkgray;
+    }
+
+    #room-holder {
+        max-height: 60vh;
+        overflow-y: scroll;
+        overflow-x: hidden;
     }
 </style>
 
