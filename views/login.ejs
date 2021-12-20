@@ -12,14 +12,15 @@
 
 <body>
     <div class="row">
-        <form class="col-8 col-md-4 offset-2 offset-md-4 card p-2 mt-5" action="/login" method="post">
+        <form class="col-8 col-md-4 offset-2 offset-md-4 card p-2 px-3 mt-5" action="/login" method="post">
 
             <label for="username" class="my-2 form-label">Username</label>
-            <input class="form-control" type="text" name="username" id="username">
+            <input class="form-control" type="text" name="username" id="username" required>
 
             <label for="password" class="my-2 form-label">Password</label>
-            <input class="form-control" type="password" name="password" id="password">
+            <input class="form-control" type="password" name="password" id="password" required>
             <button class="btn btn-primary my-3">Login</button>
+            <p class="mb-1">Don't have an account? <a href="/register">register</a></p>
 
         </form>
     </div>

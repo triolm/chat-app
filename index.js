@@ -55,11 +55,13 @@ app.get("/", isLoggedIn, async (req, res) => {
     res.render('index', { rooms: user.rooms, username: req.user.username })
 })
 
-app.get('/joinRoom/', isLoggedIn, async (req, res) => {
+app.get('/joinroom/', isLoggedIn, async (req, res) => {
     console.log(req.query.id)
     const room = await Room.findById(req.query.id)
     const user = await User.findById(req.user._id);
-    user.rooms.push(room._id)
+    if (!room._id in user.rooms) {
+        user.rooms.push(room._id)
+    }
     await user.save();
     res.redirect("/")
 });
@@ -69,11 +71,13 @@ app.get('/createroom', isLoggedIn, async (req, res) => {
 })
 
 app.post("/createroom/", isLoggedIn, async (req, res) => {
-    const room = new Room({ name: req.body.roomname })
-    await room.save();
-    const user = await User.findById(req.user._id);
-    user.rooms.push(room._id)
-    await user.save();
+    if (req.body.roomname) {
+        const room = new Room({ name: req.body.roomname })
+        await room.save();
+        const user = await User.findById(req.user._id);
+        user.rooms.push(room._id)
+        await user.save();
+    }
     res.redirect('/')
 })
 

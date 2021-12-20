@@ -12,7 +12,7 @@
 
 <body>
     <div class="row w-100 m-0">
-        <span class="col-3">
+        <span class=" col-md-5 col-lg-3">
             <h3 class="p-2">Rooms</h3>
             <div id="room-holder" class="d-block" role="group">
                 <% for(i of rooms) {%>
@@ -27,16 +27,27 @@
                     <button class="btn btn-primary w-100">New Room</button>
                 </form>
                 <form class="card p-2 my-2" action="/joinroom" method="get">
-                    <input type="text" name="id" class="form-control my-2">
+                    <input type="text" name="id" class="form-control my-2" required>
                     <button class="btn btn-primary">Join Room</button>
                 </form>
             </div>
         </span>
-        <span id="right" class="col-9 d-none d-flex flex-column">
+        <span id="right" class="position-md-absolute col-md-7 col-lg-9 d-none d-flex flex-column">
 
-            <div id="room-header" class="p-2 ps-3">
-                <h3 id="room-title"></h3>
-                <p id="room-id"></p>
+            <div id="room-header" class="pt-3 ps-3 mb-2 d-flex flex-row justify-content-between">
+                <div>
+                    <h3 id="room-title"></h3>
+                    <p id="room-id" class="mb-0"></p>
+                </div>
+                <button id="close-chat" class="p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                        class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z" />
+                        <path fill-rule="evenodd"
+                            d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z" />
+                    </svg>
+                </button>
             </div>
             <div id="txt" class="px-2"></div>
             <form id="msgInput" class="d-flex">
@@ -54,6 +65,7 @@
         let sendMsg = document.getElementById("sendmsg")
         let roomTitle = document.getElementById("room-title")
         let joinCode = document.getElementById("room-id")
+        let closeChat = document.getElementById("close-chat")
         let username = '<%- JSON.stringify(username) %>'
             <% for (i of rooms) {%>
 
@@ -72,6 +84,11 @@
                         socket.emit("msg", { text: msgBody.value, username: username })
                         msgBody.value = ""
                     })
+
+        closeChat.addEventListener("click", () => {
+            document.getElementById("right").classList.add('d-none');
+
+        })
 
         socket.on('msg', (msg) => {
             el = document.createElement('p')
@@ -157,6 +174,26 @@
         max-height: 60vh;
         overflow-y: scroll;
         overflow-x: hidden;
+    }
+
+    #close-chat {
+        display: none;
+        border: none;
+        transition: transform 100ms;
+    }
+
+    #close-chat:hover {
+        transform: scale(1.05);
+    }
+
+    @media(max-width: 768px) {
+        .position-md-absolute {
+            position: absolute;
+        }
+
+        #close-chat {
+            display: inherit !important;
+        }
     }
 </style>
 
