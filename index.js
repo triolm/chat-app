@@ -8,6 +8,9 @@ const session = require("express-session")
 const { User, Room } = require('./schemas.js')
 const passport = require('passport')
 const LocalStrategy = require('passport-local');
+const path = require("path")
+const ejs = require("ejs");
+const ejsMate = require('ejs-mate');
 
 
 const io = new Server(server);
@@ -20,8 +23,7 @@ mongoose.connect('mongodb://localhost:27017/chat', { useNewUrlParser: true, useU
         console.log(err)
     })
 
-const path = require("path")
-const ejs = require("ejs");
+
 
 app.use(session({
     secret: 'secret',
@@ -30,6 +32,7 @@ app.use(session({
     saveUninitialized: true
 
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json())
@@ -41,6 +44,12 @@ passport.deserializeUser(User.deserializeUser());
 
 app.set("views", path.join(__dirname, "views"))
 app.set("view engine", "ejs")
+app.engine("ejs", ejsMate);
+
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
+    next();
+})
 
 isLoggedIn = (req, res, next) => {
     if (!req.isAuthenticated()) {
@@ -55,9 +64,9 @@ app.get("/", isLoggedIn, async (req, res) => {
     res.render('index', { rooms: user.rooms, username: req.user.username })
 })
 
-app.get('/joinroom/', isLoggedIn, async (req, res) => {
+app.post('/joinroom/', isLoggedIn, async (req, res) => {
     console.log(req.query.id)
-    const room = await Room.findById(req.query.id)
+    const room = await Room.findById(req.body.id)
     const user = await User.findById(req.user._id);
     if (!room._id in user.rooms) {
         user.rooms.push(room._id)
@@ -65,6 +74,10 @@ app.get('/joinroom/', isLoggedIn, async (req, res) => {
     await user.save();
     res.redirect("/")
 });
+
+app.get('/joinroom', isLoggedIn, async (req, res) => {
+    res.render('joinroom')
+})
 
 app.get('/createroom', isLoggedIn, async (req, res) => {
     res.render('newroom')
@@ -75,17 +88,23 @@ app.post("/createroom/", isLoggedIn, async (req, res) => {
         const room = new Room({ name: req.body.roomname })
         await room.save();
         const user = await User.findById(req.user._id);
-        user.rooms.push(room._id)
+        user.rooms.push(room._id);
         await user.save();
     }
-    res.redirect('/')
+    res.redirect('/');
 })
 
 app.get("/login", (req, res) => {
-    res.render('login')
+    if (req.user) {
+        return res.redirect('/');
+    }
+    res.render('login');
 })
 
 app.get('/register', (req, res) => {
+    if (req.user) {
+        return res.redirect('/');
+    }
     res.render('register')
 })
 
@@ -107,6 +126,10 @@ app.post('/login',
         req.session.redirect ? res.redirect(req.session.redirect) : res.redirect('/');
     });
 
+app.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect("/login");
+})
 
 io.on('connection', (socket) => {
     console.log('a user connected');
