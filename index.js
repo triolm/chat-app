@@ -42,7 +42,10 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.set("views", path.join(__dirname, "views"))
+app.set("views", path.join(__dirname, "public/views"))
+app.use(express.static(__dirname + '/public'));
+
+
 app.set("view engine", "ejs")
 app.engine("ejs", ejsMate);
 
@@ -65,10 +68,9 @@ app.get("/", isLoggedIn, async (req, res) => {
 })
 
 app.post('/joinroom/', isLoggedIn, async (req, res) => {
-    console.log(req.query.id)
     const room = await Room.findById(req.body.id)
     const user = await User.findById(req.user._id);
-    if (!room._id in user.rooms) {
+    if (!(room._id in user.rooms)) {
         user.rooms.push(room._id)
     }
     await user.save();
